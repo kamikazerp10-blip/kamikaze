@@ -101,4 +101,4 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 // LOGIN
-client.login('client.login(process.env.TOKEN');
+client.login(process.env.TOKEN);

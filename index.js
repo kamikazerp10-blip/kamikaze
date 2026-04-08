@@ -37,6 +37,18 @@ client.once('ready', async () => {
                 .setStyle(ButtonStyle.Primary)
         );
 
+        // 🔥 APAGA MENSAGEM ANTIGA DO BOT
+        const mensagens = await canal.messages.fetch({ limit: 10 });
+
+        const antiga = mensagens.find(msg => 
+            msg.author.id === client.user.id
+        );
+
+        if (antiga) {
+            await antiga.delete();
+        }
+
+        // 🔥 ENVIA NOVA
         await canal.send({
             content: "📌 **Sistema de Registro Kamikaze**\n\nClique no botão abaixo para se registrar e liberar o acesso ao servidor.",
             components: [row]
@@ -111,10 +123,10 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 });
 
-// 🔥 Anti-crash básico
+// 🔥 Anti-crash
 process.on('unhandledRejection', error => {
     console.error('Erro não tratado:', error);
 });
 
-// LOGIN (Render usa variável de ambiente)
+// LOGIN (Render)
 client.login(process.env.TOKEN);

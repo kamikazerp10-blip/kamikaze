@@ -1,14 +1,3 @@
-const express = require('express');
-const app = express();
-
-app.get('/', (req, res) => {
-    res.send('Bot está online!');
-});
-
-app.listen(3000, () => {
-    console.log('Servidor web rodando');
-});
-
 const { 
   Client, GatewayIntentBits, 
   ActionRowBuilder, ButtonBuilder, ButtonStyle,
@@ -16,11 +5,23 @@ const {
   Events
 } = require('discord.js');
 
+const express = require('express');
+const app = express();
+
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 // 🔥 CONFIGURAÇÕES
 const CANAL_REGISTRO_ID = '1491298576561606847';
 const CARGO_ID = '1489680137996734515';
+
+// 🌐 SERVIDOR WEB (keep alive)
+app.get('/', (req, res) => {
+    res.send('Kamikaze Register está online!');
+});
+
+app.listen(3000, () => {
+    console.log('🌐 Servidor web rodando');
+});
 
 // Quando o bot ligar
 client.once('ready', async () => {
@@ -82,7 +83,6 @@ client.on(Events.InteractionCreate, async interaction => {
         const id = interaction.fields.getTextInputValue('id');
         const nome = interaction.fields.getTextInputValue('nome');
 
-        // 🔥 PEGA CARGO PELO ID (100% confiável)
         const cargo = interaction.guild.roles.cache.get(CARGO_ID);
 
         // Adiciona cargo
@@ -111,5 +111,10 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 });
 
-// LOGIN
+// 🔥 Anti-crash básico
+process.on('unhandledRejection', error => {
+    console.error('Erro não tratado:', error);
+});
+
+// LOGIN (Render usa variável de ambiente)
 client.login(process.env.TOKEN);

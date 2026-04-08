@@ -30,6 +30,11 @@ client.once('ready', async () => {
     try {
         const canal = await client.channels.fetch(CANAL_REGISTRO_ID);
 
+        if (!canal) {
+            console.log("❌ Canal não encontrado!");
+            return;
+        }
+
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId('registrar')
@@ -37,25 +42,33 @@ client.once('ready', async () => {
                 .setStyle(ButtonStyle.Primary)
         );
 
-        // 🔥 APAGA MENSAGEM ANTIGA DO BOT
-        const mensagens = await canal.messages.fetch({ limit: 10 });
+        // 🔥 TENTA APAGAR MENSAGEM ANTIGA (SEM QUEBRAR)
+        try {
+            const mensagens = await canal.messages.fetch({ limit: 10 });
 
-        const antiga = mensagens.find(msg => 
-            msg.author.id === client.user.id
-        );
+            const antiga = mensagens.find(msg => 
+                msg.author.id === client.user.id
+            );
 
-        if (antiga) {
-            await antiga.delete();
+            if (antiga) {
+                await antiga.delete();
+                console.log("🗑️ Mensagem antiga apagada");
+            }
+
+        } catch (err) {
+            console.log("⚠️ Não conseguiu apagar mensagens antigas:", err.message);
         }
 
-        // 🔥 ENVIA NOVA
+        // 🔥 ENVIA NOVO PAINEL (SEMPRE)
         await canal.send({
             content: "📌 **Sistema de Registro Kamikaze**\n\nClique no botão abaixo para se registrar e liberar o acesso ao servidor.",
             components: [row]
         });
 
+        console.log("✅ Painel de registro enviado");
+
     } catch (err) {
-        console.log("Erro ao enviar mensagem de registro:", err);
+        console.log("❌ Erro geral no ready:", err);
     }
 });
 
@@ -113,7 +126,7 @@ client.on(Events.InteractionCreate, async interaction => {
         try {
             await interaction.member.setNickname(`${id} | ${nome}`);
         } catch (err) {
-            console.log("Erro ao mudar nickname:", err);
+            console.log("⚠️ Erro ao mudar nickname:", err.message);
         }
 
         await interaction.reply({
@@ -128,5 +141,5 @@ process.on('unhandledRejection', error => {
     console.error('Erro não tratado:', error);
 });
 
-// LOGIN (Render)
+// LOGIN
 client.login(process.env.TOKEN);
